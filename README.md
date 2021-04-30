@@ -176,7 +176,7 @@ class UserCardComponent(TemplateComponent)
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
   <p>{{ user.profile.about_me</p>
-  {% user_contact_info_component %}
+  {% user_contact_info_component user=user viewer=viewer %}
 </div>
 ```
 
@@ -207,8 +207,6 @@ subclasses can choose to override this method to control whether the component s
 
 ## Testing
 
-### Using `include`
-
 Django's [`testing tools`](https://docs.djangoproject.com/en/3.2/topics/testing/tools/) for templates
 are largely built around testing views. If we want to test `include`d templates in isolation it's
 possible but fraught for several reasons:
@@ -218,11 +216,13 @@ once you know where to look).
 * Implicit contracts are allowed, so subtle bugs can creep in depending on how other templates
 `include` them. Explicit contracts are possible only if callers are careful to always pass `only`.
 
+### Using `include`
+
 ```python
 from django.template.loader import render_to_string
+from django.test import SimpleTestCase
 
 class UserCardTest(SimpleTestCase):
-
     def test_contact_info_not_shown_if_user_opted_out(self):
         user = test_user()  # this returns a user object opted-out of sharing contact info
         context = {'user': user, 'viewer': user})
@@ -231,12 +231,26 @@ class UserCardTest(SimpleTestCase):
 
     def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
         user = test_user()  # this returns a user object opted-out of sharing contact info
-        viwer = staff_user()
-        context = {'user': user, 'viewer': viewer}
+        staff = staff_user()
+        context = {'user': user, 'viewer': staff}
         rendered_template = template_to_render.render(context)
         self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
 ```
 
 ### Using Template Components
 
-TODO
+```python
+from django_template_component.test import ComponentTestCase, render_component
+
+class UserCardTest(ComponentTestCase):
+    def test_contact_info_not_shown_if_user_opted_out(self):
+        user = test_user()  # this returns a user object opted-out of sharing contact info
+        rendered_component = render_component(UserCardComponent, user=user, viewer=user)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
+
+    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
+        user = test_user()  # this returns a user object opted-out of sharing contact info
+        staff = staff_user()
+        rendered_template = render_component(UserCardComponent, user=user, viewer=staff)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
+```
