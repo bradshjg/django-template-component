@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-template-component"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "James Bradshaw", email = "james.g.bradshaw@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = ["django"]
+
+[project.urls]
+Documentation = "https://github.com/James Bradshaw/django-template-component#readme"
+Issues = "https://github.com/James Bradshaw/django-template-component/issues"
+Source = "https://github.com/James Bradshaw/django-template-component"
+
+[project.optional-dependencies]
+test = [
+  "pytest~=8.1",
+  "pytest-django~=4.11",
+  "beautifulsoup4",
+]
+
+[tool.hatch.version]
+path = "src/django_template_component/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/django_template_component tests}"
+
+[tool.hatch.envs.dev]
+path = ".venv/dev"
+features = [
+  "test",
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.10", "3.13"]
+django = ["4.2", "latest"]
+
+[tool.hatch.envs.hatch-test]
+extra-args = ["-vv"]
+features = [
+  "test",
+]
+dev-mode = false
+
+[tool.hatch.envs.hatch-test.overrides]
+matrix.django.dependencies = [
+  { value = "django~=4.2", if = ["4.2"] }
+]
+
+[tool.pytest.ini_options]
+django_find_project = false
+DJANGO_SETTINGS_MODULE = "settings"
+pythonpath = "tests tests/server"
+
+[tool.coverage.run]
+source_pkgs = ["django_template_component", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/django_template_component/__about__.py",
+]
+
+[tool.coverage.paths]
+django_template_component = ["src/django_template_component", "*/django-template-component/src/django_template_component"]
+tests = ["tests", "*/django-template-component/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

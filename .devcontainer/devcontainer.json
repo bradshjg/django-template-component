@@ -1,0 +1,19 @@
+{
+    "name": "django-template-component",
+    "image": "mcr.microsoft.com/devcontainers/python",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/workspaces/django-template-component/.venv/dev/bin/python"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers-extra/features/hatch:2": {}
+    },
+    "postCreateCommand": ["hatch", "env", "create", "dev"],
+    "postAttachCommand": ["hatch", "shell", "--name", "zsh", "dev"]
+}
