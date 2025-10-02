@@ -102,7 +102,7 @@ class UserCardComponent(TemplateComponent):
     template_name = 'my_app/user_card.html'
 
     def __init__(self, *, user):
-      self.user = user
+      self.context = {"user": user}
 ```
 
 `myapp/components/my_app/user_card.html`
@@ -190,8 +190,7 @@ class UserCardComponent(TemplateComponent):
     template_name = 'myapp/user_card.html'
 
     def __init__(self, *, user, viewer):
-      self.user = user
-      self.viewer = viewer
+      self.context = {"user": user, "viewer": viewer}
 ```
 
 `myapp/components/myapp/user_card.html`
@@ -215,8 +214,7 @@ class UserContactInfoComponent(TemplateComponent):
     template_name = 'myapp/user_contact_info.html'
 
     def __init__(self, *, user, viewer):
-      self.user = user
-      self.viewer = viewer
+      self.context = {"user": user, "viewer": viewer}
 
     def should_render(self):
       if user.profile.show_contact_info or viewer.is_staff:
