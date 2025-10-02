@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/gunicorn-django-canonical-logs
+      url: https://pypi.org/p/django-template-component
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
