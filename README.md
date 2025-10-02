@@ -3,6 +3,16 @@ Explicit contracts for "including" other templates within a template inspired by
 
 A framework for building reusable, testable & encapsulated template components in Django.
 
+## Installation
+
+`pip install django-template-component`
+
+### Setup
+
+Add `django-template-component` to `INSTALLED_APPS`.
+
+This will import `{app}/components/**/*.py` files to run the registration hooks. Be careful of import-time side effects in those files!
+
 ## Motivation
 
 Django supports the [`include` template tag](https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#include) for
@@ -84,11 +94,11 @@ there's minimal benefit to using a component, but also minimal overhead. We have
 `myapp/components/my_app/user_card.py`
 
 ```python
-import django_template_component
+from django_template_component import register_component, TemplateComponent
 
 
-@django_template_component.register('user_card')
-class UserCardComponent(TemplateComponent)
+@register_component('user_card')
+class UserCardComponent(TemplateComponent):
     template_name = 'my_app/user_card.html'
 
     def __init__(self, *, user):
@@ -156,7 +166,7 @@ rather than been coerced silently to an empty string).
 `myapp/templates/myapp/example_user_details.html`
 ```
 ...
-{% user_card_component user=user viewer=viewer %}
+{% component 'myapp/user_card' user=user viewer=viewer %}
 ...
 ```
 
@@ -164,7 +174,7 @@ rather than been coerced silently to an empty string).
 ```
 ...
 {% for user in users %}
-  {% user_card_component user=user viewer=viewer %}
+  {% component 'myapp/user_card' user=user viewer=viewer %}
 {% endfor %}
 ...
 ```
@@ -172,11 +182,11 @@ rather than been coerced silently to an empty string).
 `myapp/components/myapp/user_card.py`
 
 ```python
-import django_template_component
+from django_template_component import register_component, TemplateComponent
 
 
-@django_template_component.register('user_card')
-class UserCardComponent(TemplateComponent)
+@register_component('user_card')
+class UserCardComponent(TemplateComponent):
     template_name = 'myapp/user_card.html'
 
     def __init__(self, *, user, viewer):
@@ -190,18 +200,18 @@ class UserCardComponent(TemplateComponent)
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
   <p>{{ user.profile.about_me }}</p>
-  {% user_contact_info_component user=user viewer=viewer %}
+  {% component 'user_contact_info' user=user viewer=viewer %}
 </div>
 ```
 
 `myapp/components/myapp/user_contact_info.py`
 
 ```python
-import django_template_component
+from django_template_component import register_component, TemplateComponent
 
 
-@django_template_component.register('user_contact_info')
-class UserContactInfoComponent(TemplateComponent)
+@register_component('user_contact_info')
+class UserContactInfoComponent(TemplateComponent):
     template_name = 'myapp/user_contact_info.html'
 
     def __init__(self, *, user, viewer):

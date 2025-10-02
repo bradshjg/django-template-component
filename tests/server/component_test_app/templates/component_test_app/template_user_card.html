@@ -1,0 +1,8 @@
+<div class="card">
+  <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
+  <p>{{ user.profile.title }}</p>
+  <p>{{ user.profile.about_me }}</p>
+  {% if user.profile.show_contact_info or viewer.is_staff %}
+    <p>{{ user.email }}</p>
+  {% endif %}
+</div>
