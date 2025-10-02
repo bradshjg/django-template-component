@@ -13,84 +13,94 @@ This allows several awesome features:
 * We can create reusable sub-templates that can be included in multiple pages.
 * With a bit of work, we can test these templates in isolation.
 * With the right invocation, we can be explicit about the context with which it will be rendered (e.g. `{% include "name_snippet.html" with greeting="Hi" only %}`).
-* It supports any object with a `render` method, allowing us to include compiled `Template`s.
+* It supports any object with a `render` method, allowing us to `include` compiled `Template`s.
 
 Template components can be thought of as a much more opinionated `include`:
 
-* They generate tags and require explicit context (e.g. `{% name_component greeting="Hi" %}`).
+* They require explicit context (e.g. `{% component 'name' greeting="Hi" %}`).
 * Every component is its own class to separate the business logic from the display logic.
-* There is explicit testing support using `TemplateComponentTest`.
 
 But this is probably best served by an example.
+
+### Differences from Rails View Components
+
+There is no support for "slots", meaning that all render context is included via the `component` template tag. This is an intentional
+design decision...but not one without drawbacks. This library intends to provide support for decomposing documents into testable and
+shareable components. It does not intend to provide the necessary tooling to build a design system. Components can render componens,
+but there's no rich support for callers modifying the rendering process. In Django, libraries like
+[django-viewcomponent](https://github.com/rails-inspire-django/django-viewcomponent) exist with that goal in mind.
 
 ### Simple Example
 
 We want to show a card with user details in multiple places on the site. In the simple case
 there's minimal benefit to using a component, but also minimal overhead. We have an explicit
 
-
 #### Using `include`
 
-`example_user_details.html`
+`myapp/templates/myapp/example_user_details.html`
 ```
 ...
-{% include 'user_card.html' %}
+{% include 'myapp/user_card.html' %}
 ...
 ```
 
-`example_user_list.html`
+`myapp/templates/myapp/example_user_list.html`
 ```
 ...
 {% for user in users %}
-  {% include 'user_card.html' with user=user only %}
+  {% include 'myapp/user_card.html' with user=user only %}
 {% endfor %}
 ...
 ```
 
-`user_card.html`
+`myapp/templates/myapp/user_card.html`
 ```
 <div class="card">
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
-  <p>{{ user.profile.about_me</p>
+  <p>{{ user.profile.about_me }}</p>
   <p>{{ user.email }}</p>
 </div>
 ```
 
 #### Using a Template Component
 
-`example_user_details.html`
+`myapp/templates/myapp/example_user_details.html`
 ```
 ...
-{% user_card_component user=user %}
+{% component 'myapp/user_card' user=user %}
 ...
 ```
 
-`example_user_list.html`
+`myapp/templates/myapp/example_user_list.html`
 ```
 ...
 {% for user in users %}
-  {% user_card_component user=user %}
+  {% component 'user-card' user=user %}
 {% endfor %}
 ...
 ```
 
-`myapp/components/user_card.py`
+`myapp/components/my_app/user_card.py`
 
 ```python
+import django_template_component
+
+
+@django_template_component.register('user_card')
 class UserCardComponent(TemplateComponent)
-    template = 'user_card.html'
+    template_name = 'my_app/user_card.html'
 
     def __init__(self, *, user):
       self.user = user
 ```
 
-`user_card.html`
+`myapp/components/my_app/user_card.html`
 ```
 <div class="card">
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
-  <p>{{ user.profile.about_me</p>
+  <p>{{ user.profile.about_me }}</p>
   <p>{{ user.email }}</p>
 </div>
 ```
@@ -102,28 +112,28 @@ opted-in to sharing that or if the user viewing that card is a staff user.
 
 #### Using `include`
 
-`example_user_details.html`
+`myapp/templates/myapp/example_user_details.html`
 ```
 ...
-{% include 'user_card.html' %}
+{% include 'myapp/user_card.html' %}
 ...
 ```
 
-`example_user_list.html`
+`myapp/templates/myapp/example_user_list.html`
 ```
 ...
 {% for user in users %}
-  {% include 'user_card.html' with user=user only %}
+  {% include 'myapp/user_card.html' with user=user only %}
 {% endfor %}
 ...
 ```
 
-`user_card.html`
+`myapp/templates/myapp/user_card.html`
 ```
 <div class="card">
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
-  <p>{{ user.profile.about_me</p>
+  <p>{{ user.profile.about_me }}</p>
   {% if user.profile.show_contact_info or viewer.is_staff %}
     <p>{{ user.email }}</p>
   {% endif %}
@@ -143,14 +153,14 @@ to test the component in isolation. Additionally, since all contracts are explic
 would've caught the earlier bug easily during testing (as it would've thrown an exception
 rather than been coerced silently to an empty string).
 
-`example_user_details.html`
+`myapp/templates/myapp/example_user_details.html`
 ```
 ...
 {% user_card_component user=user viewer=viewer %}
 ...
 ```
 
-`example_user_list.html`
+`myapp/templates/myapp/example_user_list.html`
 ```
 ...
 {% for user in users %}
@@ -159,32 +169,40 @@ rather than been coerced silently to an empty string).
 ...
 ```
 
-`myapp/components/user_card.py`
+`myapp/components/myapp/user_card.py`
 
 ```python
+import django_template_component
+
+
+@django_template_component.register('user_card')
 class UserCardComponent(TemplateComponent)
-    template = 'user_card_component.html'
+    template_name = 'myapp/user_card.html'
 
     def __init__(self, *, user, viewer):
       self.user = user
       self.viewer = viewer
 ```
 
-`user_card_component.html`
+`myapp/components/myapp/user_card.html`
 ```
 <div class="card">
   <img src="{{ user.profile.avatar_url }}" alt="{{ user.get_full_name }}">
   <p>{{ user.profile.title }}</p>
-  <p>{{ user.profile.about_me</p>
+  <p>{{ user.profile.about_me }}</p>
   {% user_contact_info_component user=user viewer=viewer %}
 </div>
 ```
 
-`myapp/components/user_contact_info.py`
+`myapp/components/myapp/user_contact_info.py`
 
 ```python
+import django_template_component
+
+
+@django_template_component.register('user_contact_info')
 class UserContactInfoComponent(TemplateComponent)
-    template = 'user_contact_info_component.html'
+    template_name = 'myapp/user_contact_info.html'
 
     def __init__(self, *, user, viewer):
       self.user = user
@@ -224,13 +242,14 @@ from django.test import SimpleTestCase
 
 class UserCardTest(SimpleTestCase):
     def test_contact_info_not_shown_if_user_opted_out(self):
-        user = test_user()  # this returns a user object opted-out of sharing contact info
-        context = {'user': user, 'viewer': user})
+        user = test_user(opt_out=True)
+        viewer = test_user()
+        context = {'user': user, 'viewer': viewer}
         rendered_template = render_to_string('user_card.html', context)
         self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
 
     def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
-        user = test_user()  # this returns a user object opted-out of sharing contact info
+        user = test_user(opt_out=True)
         staff = staff_user()
         context = {'user': user, 'viewer': staff}
         rendered_template = template_to_render.render(context)
@@ -240,17 +259,19 @@ class UserCardTest(SimpleTestCase):
 ### Using Template Components
 
 ```python
-from django_template_component.test import ComponentTestCase, render_component
+from django_template_component.test import render_component
+from django.test import SimpleTestCase
 
-class UserCardTest(ComponentTestCase):
+class UserCardTest(SimpleTestCase):
     def test_contact_info_not_shown_if_user_opted_out(self):
-        user = test_user()  # this returns a user object opted-out of sharing contact info
-        rendered_component = render_component(UserCardComponent, user=user, viewer=user)
+        user = test_user(opt_out=True)
+        anon = test_user()
+        rendered_component = render_component('myapp/user_card', user=user, viewer=anon).render
         self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
 
     def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
-        user = test_user()  # this returns a user object opted-out of sharing contact info
+        user = test_user(opt_out=True)
         staff = staff_user()
-        rendered_template = render_component(UserCardComponent, user=user, viewer=staff)
+        rendered_template = render_component('myapp/user_card', user=user, viewer=staff)
         self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
 ```
