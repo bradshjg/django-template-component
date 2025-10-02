@@ -97,7 +97,7 @@ there's minimal benefit to using a component, but also minimal overhead. We have
 from django_template_component import register_component, TemplateComponent
 
 
-@register_component('user_card')
+@register_component('my_app/user_card')
 class UserCardComponent(TemplateComponent):
     template_name = 'my_app/user_card.html'
 
@@ -185,7 +185,7 @@ rather than been coerced silently to an empty string).
 from django_template_component import register_component, TemplateComponent
 
 
-@register_component('user_card')
+@register_component('my_app/user_card')
 class UserCardComponent(TemplateComponent):
     template_name = 'myapp/user_card.html'
 
@@ -210,7 +210,7 @@ class UserCardComponent(TemplateComponent):
 from django_template_component import register_component, TemplateComponent
 
 
-@register_component('user_contact_info')
+@register_component('my_app/user_contact_info')
 class UserContactInfoComponent(TemplateComponent):
     template_name = 'myapp/user_contact_info.html'
 

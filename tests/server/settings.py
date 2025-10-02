@@ -13,4 +13,4 @@ TEMPLATES = [
 
 USE_TZ = True
 
-INSTALLED_APPS = ("component_test_app",)
+INSTALLED_APPS = ("component_test_app", "django_template_component")
