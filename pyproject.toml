@@ -24,9 +24,9 @@ classifiers = [
 dependencies = ["django"]
 
 [project.urls]
-Documentation = "https://github.com/James Bradshaw/django-template-component#readme"
-Issues = "https://github.com/James Bradshaw/django-template-component/issues"
-Source = "https://github.com/James Bradshaw/django-template-component"
+Documentation = "https://github.com/bradshjg/django-template-component#readme"
+Issues = "https://github.com/bradshjg/django-template-component/issues"
+Source = "https://github.com/bradshjg/django-template-component"
 
 [project.optional-dependencies]
 test = [
