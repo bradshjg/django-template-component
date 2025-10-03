@@ -24,7 +24,7 @@ def test_user_card_component_happy_path(client):
 
 
 def test_valid(client):
-    resp = client.get("/component-testing/valid/")
+    resp = client.get("/component-testing/valid_minimal/")
     assert resp.status_code == http.HTTPStatus.OK
     assert resp.content.decode().strip() == "<p>howdy</p>"
 
