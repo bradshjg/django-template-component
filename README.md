@@ -26,8 +26,7 @@ This will import `{app}/components/**/*.py` files to run the registration hooks.
 
 ### Anatomy of a Template Component
 
-Templates components are placed within Django app directories under a "components" folder. By convention, and similar to templates,
-they should be namespaced by including components in a "components/{app_name}" folder.
+Templates components, similar to templates, are placed within Django app directories under a `components/{app_name}/` folder.
 
 An example layout:
 
@@ -50,12 +49,12 @@ my_app/
 
 Components should inherit from `django_template_component.TemplateComponent` and provide a
 
-* `template_name` variable
-* `get_context()` method
+* `template_name` variable - the loader will look for a component's template with this name (i.e. it searches `components/` folders, not `templates/` folders)
+* `get_context()` method - return a dictionary that defines the context available to the component's template
 
-They can also provide an optional
+Components can also provide an optional
 
-* `should_render()` method that returns a boolean indicating whether the component should be rendered.
+* `should_render()` method - return a boolean indicating whether the component should be rendered (defaults to `True`)
 
 Component must register themselves under a name, by convention namespaced by app.
 
@@ -80,7 +79,7 @@ class DemoComponent(TemplateComponent):
 Component templates only have access to the context returned by the component's `get_context()` method.
 
 `my_app/components/my_app/demo.html`
-```
+```html
 <p>{{ msg }}</p>
 ```
 
@@ -97,44 +96,15 @@ variable evaluation rules, and passing either variables or literals is supported
 {% component 'my_app/demo' msg='howdy' %}
 ```
 
-which would render
+which will render
 
-`<p>howdy</p>`
+```html
+<p>howdy</p>
+```
 
 ## Testing
 
-Django's [`testing tools`](https://docs.djangoproject.com/en/3.2/topics/testing/tools/) for templates
-are largely built around testing views. If we want to test `include`d templates in isolation it's
-possible but fraught for several reasons:
-
-* It's non-obvious to set up the Django template rendering machinery (but it's not bad
-once you know where to look).
-* Implicit contracts are allowed, so subtle bugs can creep in depending on how other templates
-`include` them. Explicit contracts are possible only if callers are careful to always pass `only`.
-
-### Using `include`
-
-```python
-from django.template.loader import render_to_string
-from django.test import SimpleTestCase
-
-class UserCardTest(SimpleTestCase):
-    def test_contact_info_not_shown_if_user_opted_out(self):
-        user = test_user(opt_out=True)
-        viewer = test_user()
-        context = {'user': user, 'viewer': viewer}
-        rendered_template = render_to_string('user_card.html', context)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
-
-    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
-        user = test_user(opt_out=True)
-        staff = staff_user()
-        context = {'user': user, 'viewer': staff}
-        rendered_template = template_to_render.render(context)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
-```
-
-### Using Template Components
+`django_template_component.test.render_component` will render a registered component, accepting arbitrary kwargs.
 
 ```python
 from django_template_component.test import render_component
@@ -145,13 +115,13 @@ class UserCardTest(SimpleTestCase):
         user = test_user(opt_out=True)
         anon = test_user()
         rendered_component = render_component('myapp/user_card', user=user, viewer=anon)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
+        self.assertInHTML('test@test.com', rendered_template, count=0)
 
     def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
         user = test_user(opt_out=True)
         staff = staff_user()
         rendered_template = render_component('myapp/user_card', user=user, viewer=staff)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
+        self.assertInHTML('test@test.com', rendered_template, count=1)
 ```
 
 ## Motivation
