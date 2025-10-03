@@ -33,9 +33,11 @@ class TemplateComponent(ABC):
         return TemplateComponent._template_loader
 
     def render(self) -> SafeText | str:
+        if not self.should_render():
+            return ""
         component_template = self.template_loader.get_template(self.template_name)
         component_context = template.Context(self.get_context())
         return component_template.render(component_context)
 
-    def should_render() -> bool:
+    def should_render(self) -> bool:
         return True

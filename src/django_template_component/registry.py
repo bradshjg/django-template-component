@@ -3,7 +3,7 @@ from __future__ import annotations
 
 class ComponentNotRegisteredError(Exception):
     def __init__(self, name):
-        message = f'Component "{name}" is not registered'
+        message = f"Component '{name}' is not registered"
         super().__init__(message)
 
 

@@ -48,3 +48,8 @@ def component_user_details(request):
         profile=MockProfile(avatar_url="https://avatars.com/diane", title="diane's profile", about_me="just dian"),
     )
     return render(request, "component_test_app/component_user_details.html", {"user": user, "viewer": viewer})
+
+
+def component_testing(request, *, template):
+    template_name = f"component_test_app/{template}.html"
+    return render(request, template_name)

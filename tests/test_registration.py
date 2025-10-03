@@ -10,5 +10,5 @@ def test_component_successful_registration():
 
 
 def test_component_does_not_exist_error():
-    with pytest.raises(ComponentNotRegisteredError, match='Component "non-existent" is not registered'):
+    with pytest.raises(ComponentNotRegisteredError, match="Component 'non-existent' is not registered"):
         component_registry.get("non-existent")
