@@ -10,6 +10,7 @@ class MockProfile:
     about_me: str
     show_contact_info: bool = False
 
+
 @dataclasses.dataclass(frozen=True)
 class MockUser:
     name: str
@@ -20,44 +21,30 @@ class MockUser:
     def get_full_name(self) -> str:
         return self.name
 
+
 def template_user_details(request):
     user = MockUser(
         name="jack",
         email="jack@example.com",
-        profile=MockProfile(
-            avatar_url="https://avatars.com/jack",
-            title="jack's profile",
-            about_me="just jack"
-        )
+        profile=MockProfile(avatar_url="https://avatars.com/jack", title="jack's profile", about_me="just jack"),
     )
     viewer = MockUser(
         name="diane",
         email="diane@example.com",
-        profile=MockProfile(
-            avatar_url="https://avatars.com/diane",
-            title="diane's profile",
-            about_me="just diane"
-        )
+        profile=MockProfile(avatar_url="https://avatars.com/diane", title="diane's profile", about_me="just diane"),
     )
     return render(request, "component_test_app/template_user_details.html", {"user": user, "viewer": viewer})
+
 
 def component_user_details(request):
     user = MockUser(
         name="jack",
         email="jack@example.com",
-        profile=MockProfile(
-            avatar_url="https://avatars.com/jack",
-            title="jack's profile",
-            about_me="just jack"
-        )
+        profile=MockProfile(avatar_url="https://avatars.com/jack", title="jack's profile", about_me="just jack"),
     )
     viewer = MockUser(
         name="diane",
         email="diane@example.com",
-        profile=MockProfile(
-            avatar_url="https://avatars.com/diane",
-            title="diane's profile",
-            about_me="just dian"
-        )
+        profile=MockProfile(avatar_url="https://avatars.com/diane", title="diane's profile", about_me="just dian"),
     )
     return render(request, "component_test_app/component_user_details.html", {"user": user, "viewer": viewer})

@@ -17,4 +17,3 @@ def test_component(client):
 
     html = BeautifulSoup(resp.content, "html.parser")
     assert html.p.string == "jack's profile"
-

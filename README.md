@@ -86,7 +86,7 @@ there's minimal benefit to using a component, but also minimal overhead. We have
 ```
 ...
 {% for user in users %}
-  {% component 'user-card' user=user %}
+  {% component 'myapp/user_card' user=user %}
 {% endfor %}
 ...
 ```
@@ -102,7 +102,10 @@ class UserCardComponent(TemplateComponent):
     template_name = 'my_app/user_card.html'
 
     def __init__(self, *, user):
-      self.context = {"user": user}
+      self.user = user
+
+    def get_context(self):
+        return {"user": self.user}
 ```
 
 `myapp/components/my_app/user_card.html`
@@ -190,7 +193,11 @@ class UserCardComponent(TemplateComponent):
     template_name = 'myapp/user_card.html'
 
     def __init__(self, *, user, viewer):
-      self.context = {"user": user, "viewer": viewer}
+      self.user = user
+      self.viewer = viewer
+
+    def get_context(self):
+      return {"user": self.user, "viewer": self.viewer}
 ```
 
 `myapp/components/myapp/user_card.html`
@@ -214,7 +221,11 @@ class UserContactInfoComponent(TemplateComponent):
     template_name = 'myapp/user_contact_info.html'
 
     def __init__(self, *, user, viewer):
-      self.context = {"user": user, "viewer": viewer}
+      self.user = user
+      self.viewer = viewer
+
+    def get_context(self):
+      return {"user": self.user, "viewer": self.viewer}
 
     def should_render(self):
       if user.profile.show_contact_info or viewer.is_staff:

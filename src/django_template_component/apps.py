@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-from django_template_component.autodiscovery import autodiscover_components
+from django_template_component.loader import autodiscover_components
 
 
 class DjangoTemplateComponentConfig(AppConfig):

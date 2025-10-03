@@ -4,6 +4,13 @@ import sys
 from pathlib import Path
 
 from django.apps import apps
+from django.template.loaders.app_directories import Loader as AppDirectoriesLoader
+from django.template.utils import get_app_template_dirs
+
+
+class ComponentLoader(AppDirectoriesLoader):
+    def get_dirs(self):
+        return get_app_template_dirs("components")
 
 
 def autodiscover_components():

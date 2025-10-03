@@ -8,3 +8,6 @@ class UserCardComponent(TemplateComponent):
     def __init__(self, *, user, viewer):
         self.user = user
         self.viewer = viewer
+
+    def get_context(self):
+        return {"user": self.user, "viewer": self.viewer}
