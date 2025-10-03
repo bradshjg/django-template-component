@@ -25,6 +25,6 @@ class ComponentNode(template.Node):
         self.kwargs = kwargs
 
     def render(self, context):
-        component = component_registry.get(self.component_name)
+        component_cls = component_registry.get(self.component_name)
         kwargs = {key: value.resolve(context) for key, value in self.kwargs.items()}
-        return component(**kwargs).render()
+        return component_cls(**kwargs).render()
