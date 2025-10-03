@@ -1,7 +1,16 @@
 # django-template-component
 Explicit contracts for "including" other templates within a template inspired by https://github.com/github/view_component.
 
-A framework for building reusable, testable & encapsulated template components in Django.
+A framework for building reusable, testable, and encapsulated template components in Django.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Testing](#testing)
+- [Motivation](#motivation)
+- [Examples](#examples)
+- [License](#license)
 
 ## Installation
 
@@ -12,6 +21,138 @@ A framework for building reusable, testable & encapsulated template components i
 Add `django-template-component` to `INSTALLED_APPS`.
 
 This will import `{app}/components/**/*.py` files to run the registration hooks. Be careful of import-time side effects in those files!
+
+## Usage
+
+### Anatomy of a Template Component
+
+Templates components are placed within Django app directories under a "components" folder. By convention, and similar to templates,
+they should be namespaced by including components in a "components/{app_name}" folder.
+
+An example layout:
+
+```
+my_app/
+|  apps.py
+|  ...
+|__components/
+|  |__my_app/
+|     |  demo.py
+|     |  demo.html
+|     |  ...
+|__templates/
+   |__my_app/
+      |  demo.html
+      |  ...
+```
+
+#### Component class
+
+Components should inherit from `django_template_component.TemplateComponent` and provide a
+
+* `template_name` variable
+* `get_context()` method
+
+They can also provide an optional
+
+* `should_render()` method that returns a boolean indicating whether the component should be rendered.
+
+Component must register themselves under a name, by convention namespaced by app.
+
+`my_app/components/my_app/demo.py`
+```python
+from django_template_component import TemplateComponent, register_component
+
+
+@register_component("my_app/demo")
+class DemoComponent(TemplateComponent):
+    template_name = "my_app/demo.html"
+
+    def __init__(self, *, msg):
+        self.msg = msg
+
+    def get_context(self):
+        return {"msg": self.msg}
+```
+
+### Component template
+
+Component templates only have access to the context returned by the component's `get_context()` method.
+
+`my_app/components/my_app/demo.html`
+```
+<p>{{ msg }}</p>
+```
+
+### Using a component in a Django template
+
+Rendering a component in a template uses the `component` template tag, supplying a quoted component name and any number of `key=value`
+arguments that will be supplied as keyword arguments to initialize the component class. These values follow the template language
+variable evaluation rules, and passing either variables or literals is supported.
+
+`my_app/templates/my_app/demo.hml`
+```
+{% load component %}
+
+{% component 'my_app/demo' msg='howdy' %}
+```
+
+which would render
+
+`<p>howdy</p>`
+
+## Testing
+
+Django's [`testing tools`](https://docs.djangoproject.com/en/3.2/topics/testing/tools/) for templates
+are largely built around testing views. If we want to test `include`d templates in isolation it's
+possible but fraught for several reasons:
+
+* It's non-obvious to set up the Django template rendering machinery (but it's not bad
+once you know where to look).
+* Implicit contracts are allowed, so subtle bugs can creep in depending on how other templates
+`include` them. Explicit contracts are possible only if callers are careful to always pass `only`.
+
+### Using `include`
+
+```python
+from django.template.loader import render_to_string
+from django.test import SimpleTestCase
+
+class UserCardTest(SimpleTestCase):
+    def test_contact_info_not_shown_if_user_opted_out(self):
+        user = test_user(opt_out=True)
+        viewer = test_user()
+        context = {'user': user, 'viewer': viewer}
+        rendered_template = render_to_string('user_card.html', context)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
+
+    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
+        user = test_user(opt_out=True)
+        staff = staff_user()
+        context = {'user': user, 'viewer': staff}
+        rendered_template = template_to_render.render(context)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
+```
+
+### Using Template Components
+
+```python
+from django_template_component.test import render_component
+from django.test import SimpleTestCase
+
+class UserCardTest(SimpleTestCase):
+    def test_contact_info_not_shown_if_user_opted_out(self):
+        user = test_user(opt_out=True)
+        anon = test_user()
+        rendered_component = render_component('myapp/user_card', user=user, viewer=anon)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
+
+    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
+        user = test_user(opt_out=True)
+        staff = staff_user()
+        rendered_template = render_component('myapp/user_card', user=user, viewer=staff)
+        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
+```
 
 ## Motivation
 
@@ -40,10 +181,12 @@ shareable components. It does not intend to provide the necessary tooling to bui
 but there's no rich support for callers modifying the rendering process. In Django, libraries like
 [django-viewcomponent](https://github.com/rails-inspire-django/django-viewcomponent) exist with that goal in mind.
 
+## Examples
+
 ### Simple Example
 
 We want to show a card with user details in multiple places on the site. In the simple case
-there's minimal benefit to using a component, but also minimal overhead. We have an explicit
+there's minimal benefit to using a component, but also minimal overhead.
 
 #### Using `include`
 
@@ -242,55 +385,6 @@ subclasses can choose to override this method to control whether the component s
 <p>{{ user.email }}</p>
 ```
 
-## Testing
+## License
 
-Django's [`testing tools`](https://docs.djangoproject.com/en/3.2/topics/testing/tools/) for templates
-are largely built around testing views. If we want to test `include`d templates in isolation it's
-possible but fraught for several reasons:
-
-* It's non-obvious to set up the Django template rendering machinery (but it's not bad
-once you know where to look).
-* Implicit contracts are allowed, so subtle bugs can creep in depending on how other templates
-`include` them. Explicit contracts are possible only if callers are careful to always pass `only`.
-
-### Using `include`
-
-```python
-from django.template.loader import render_to_string
-from django.test import SimpleTestCase
-
-class UserCardTest(SimpleTestCase):
-    def test_contact_info_not_shown_if_user_opted_out(self):
-        user = test_user(opt_out=True)
-        viewer = test_user()
-        context = {'user': user, 'viewer': viewer}
-        rendered_template = render_to_string('user_card.html', context)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
-
-    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
-        user = test_user(opt_out=True)
-        staff = staff_user()
-        context = {'user': user, 'viewer': staff}
-        rendered_template = template_to_render.render(context)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
-```
-
-### Using Template Components
-
-```python
-from django_template_component.test import render_component
-from django.test import SimpleTestCase
-
-class UserCardTest(SimpleTestCase):
-    def test_contact_info_not_shown_if_user_opted_out(self):
-        user = test_user(opt_out=True)
-        anon = test_user()
-        rendered_component = render_component('myapp/user_card', user=user, viewer=anon).render
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=0)
-
-    def test_contact_info_shown_if_user_opted_out_but_viewer_is_staff(self):
-        user = test_user(opt_out=True)
-        staff = staff_user()
-        rendered_template = render_component('myapp/user_card', user=user, viewer=staff)
-        self.assertInHTML('<p>test@test.com</p>', rendered_template, count=1)
-```
+`django-template-component` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
