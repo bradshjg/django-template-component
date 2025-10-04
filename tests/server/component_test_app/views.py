@@ -52,4 +52,4 @@ def component_user_details(request):
 
 def component_testing(request, *, template):
     template_name = f"component_test_app/{template}.html"
-    return render(request, template_name)
+    return render(request, template_name, request.GET.dict())

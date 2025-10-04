@@ -1,3 +1,7 @@
 {% load component %}
 
-{% component 'component_test_app/minimal' msg='howdy' %}
+{% if msg is not None %}
+    {% component 'component_test_app/minimal' msg=msg %}
+{% else %}
+    {% component 'component_test_app/minimal' msg='howdy-literal' %}
+{% endif %}
