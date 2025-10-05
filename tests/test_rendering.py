@@ -19,7 +19,7 @@ def test_debug_render_includes_start_and_end_comments(settings):
 howdy
 
 <!-- END COMPONENT class: {cls_name} file: {file_path} -->
-""".lstrip()
+"""
     assert DebugComponent().render() == expected_output
 
 
