@@ -1,6 +1,6 @@
 ROOT_URLCONF = "app"
 
-DEBUG = True
+DEBUG = False
 
 SECRET_KEY = "not-so-secret"
 
