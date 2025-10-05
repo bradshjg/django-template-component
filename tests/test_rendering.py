@@ -10,15 +10,15 @@ def test_should_render_false():
     assert ShouldRenderComponent(should_render=False).render() == ""
 
 
-def test_debug_render_includes_start_end_comments(settings):
+def test_debug_render_includes_start_and_end_comments(settings):
     settings.DEBUG = True
-    cls_path = "tests.server.component_test_app.components.component_test_app.debug_testing.DebugComponent"
+    cls_name = "DebugComponent"
     file_path = "/workspaces/django-template-component/tests/server/component_test_app/components/component_test_app/debug_testing.py"
     expected_output = f"""
-<!-- START COMPONENT class: {cls_path}; file: {file_path} -->
+<!-- START COMPONENT class: {cls_name} file: {file_path} -->
 howdy
 
-<!-- END COMPONENT class: {cls_path}; file: {file_path} -->
+<!-- END COMPONENT class: {cls_name} file: {file_path} -->
 """.lstrip()
     assert DebugComponent().render() == expected_output
 

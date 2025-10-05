@@ -46,10 +46,10 @@ class TemplateComponent(ABC):
         return rendered_content
 
     def wrap_with_debug_info(self, component_template: template.Template) -> template.Template:
-        cls_path = '.'.join([self.__class__.__module__, self.__class__.__name__])
+        cls_name = self.__class__.__name__
         file_path = inspect.getfile(self.__class__)
-        start_comment = f"<!-- START COMPONENT class: {cls_path}; file: {file_path} -->\n"
-        end_comment = f"\n<!-- END COMPONENT class: {cls_path}; file: {file_path} -->\n"
+        start_comment = f"<!-- START COMPONENT class: {cls_name} file: {file_path} -->\n"
+        end_comment = f"\n<!-- END COMPONENT class: {cls_name} file: {file_path} -->\n"
         component_template.nodelist.insert(0, template.base.TextNode(start_comment))
         component_template.nodelist.append(template.base.TextNode(end_comment))
         return component_template
