@@ -13,7 +13,7 @@ def test_should_render_false():
 def test_debug_render_includes_start_and_end_comments(settings):
     settings.DEBUG = True
     cls_name = "DebugComponent"
-    file_path = "/workspaces/django-template-component/tests/server/component_test_app/components/component_test_app/debug_testing.py"
+    file_path = "server/component_test_app/components/component_test_app/debug_testing.py"
     expected_output = f"""
 <!-- START COMPONENT class: {cls_name} file: {file_path} -->
 howdy

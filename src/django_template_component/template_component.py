@@ -48,6 +48,8 @@ class TemplateComponent(ABC):
     def wrap_with_debug_info(self, component_template: template.Template) -> template.Template:
         cls_name = self.__class__.__name__
         file_path = inspect.getsourcefile(self.__class__)
+        if settings.BASE_DIR:
+            file_path = file_path.removeprefix(str(settings.BASE_DIR) + "/")
         start_comment = f"\n<!-- START COMPONENT class: {cls_name} file: {file_path} -->\n"
         end_comment = f"\n<!-- END COMPONENT class: {cls_name} file: {file_path} -->\n"
         component_template.nodelist.insert(0, template.base.TextNode(start_comment))
