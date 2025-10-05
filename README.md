@@ -18,7 +18,7 @@ A framework for building reusable, testable, and encapsulated template component
 
 ### Setup
 
-Add `django-template-component` to `INSTALLED_APPS`.
+Add `django_template_component` to `INSTALLED_APPS`.
 
 This will import `{app}/components/**/*.py` files to run the registration hooks. Be careful of import-time side effects in those files!
 
