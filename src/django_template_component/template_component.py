@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Mapping
 
 from django import template
-from django.utils.safestring import mark_safe
 from django.conf import settings
 
 from django_template_component.loader import ComponentLoader
@@ -42,8 +41,7 @@ class TemplateComponent(ABC):
         component_context = template.Context(self.get_context())
         if self.include_debug_info:
             component_template = self.wrap_with_debug_info(component_template)
-        rendered_content = component_template.render(component_context)
-        return rendered_content
+        return component_template.render(component_context)
 
     def wrap_with_debug_info(self, component_template: template.Template) -> template.Template:
         cls_name = self.__class__.__name__

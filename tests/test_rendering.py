@@ -1,5 +1,5 @@
-from tests.server.component_test_app.components.component_test_app.should_render_testing import ShouldRenderComponent
 from tests.server.component_test_app.components.component_test_app.debug_testing import DebugComponent
+from tests.server.component_test_app.components.component_test_app.should_render_testing import ShouldRenderComponent
 
 
 def test_should_render_true():
